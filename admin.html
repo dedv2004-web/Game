@@ -92,16 +92,14 @@
   <script>
     // Cargar datos locales comunes
     let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
-      title: '⚽ Gran Partido Fútbol 7',
-      location: 'Cancha Don Bosco',
-      date: 'Viernes 12 de Octubre, 20:00 hrs',
-      price: '$5.000'
+      title: '',
+      location: '',
+      date: '',
+      price: ''
     };
 
     let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-      { id: 1, name: 'Carlos Mendoza', team: 'TEAM_A', status: 'confirmed' },
-      { id: 2, name: 'Andrés Pérez', team: 'TEAM_A', status: 'pending' },
-      { id: 3, name: 'Matías Rojas', team: 'TEAM_B', status: 'confirmed' }
+    
     ];
 
     // Rellenar formulario del evento al cargar
