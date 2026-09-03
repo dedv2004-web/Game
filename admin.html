@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -67,12 +67,12 @@
       </form>
     </section>
 
-    <!-- Sección 2: Gestión de Jugadores Inscritos -->
+    <!-- Sección 2: Gestión de Jugadores Titulares -->
     <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
       <h2 class="font-bold text-slate-900 text-lg mb-1 flex items-center">
-        <i class="fa-solid fa-users text-emerald-600 mr-2"></i> Listado de Inscritos y Validación de Pagos
+        <i class="fa-solid fa-users text-emerald-600 mr-2"></i> Jugadores Titulares y Validación de Pagos
       </h2>
-      <p class="text-xs text-slate-500 mb-6">Cambia el estatus a "Confirmado" una vez verifiques la transferencia bancaria.</p>
+      <p class="text-xs text-slate-500 mb-6">Aprueba los pagos o mueve a la banca/espera a quienes no hayan transferido.</p>
 
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse text-sm">
@@ -80,7 +80,7 @@
             <tr class="border-b border-slate-200 text-slate-400 font-semibold text-xs uppercase bg-slate-50">
               <th class="p-3">Jugador</th>
               <th class="p-3">Equipo</th>
-              <th class="p-3">Estatus actual</th>
+              <th class="p-3">Estatus</th>
               <th class="p-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -91,9 +91,47 @@
       </div>
     </section>
 
+    <!-- Sección 3: Lista de Espera -->
+    <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+      <h2 class="font-bold text-slate-900 text-lg mb-1 flex items-center">
+        <i class="fa-solid fa-hourglass-half text-amber-600 mr-2"></i> Lista de Espera
+      </h2>
+      <p class="text-xs text-slate-500 mb-6">Jugadores anotados una vez llenados los cupos titulares. Puedes pasarlos a un equipo si se libera espacio.</p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-400 font-semibold text-xs uppercase bg-slate-50">
+              <th class="p-3">Jugador</th>
+              <th class="p-3">Teléfono</th>
+              <th class="p-3">Estatus</th>
+              <th class="p-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminWaitlistTable" class="divide-y divide-slate-100">
+            <!-- Dinámico -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 
   <script>
+    // --- CONTROL DE ACCESO ---
+    const ADMIN_CODE = "1234"; // Cambia este código por el que prefieras
+    let ingresoAutorizado = sessionStorage.getItem('fut7_auth');
+
+    if (ingresoAutorizado !== 'true') {
+      let codigoIngresado = prompt("Ingresa el código de acceso de administración:");
+      if (codigoIngresado === ADMIN_CODE) {
+        sessionStorage.setItem('fut7_auth', 'true');
+      } else {
+        alert("Código incorrecto. Acceso denegado.");
+        window.location.href = "index.html";
+      }
+    }
+
     let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
       title: '',
       location: '',
@@ -102,8 +140,8 @@
       playersPerTeam: 5
     };
 
-    let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-    ];
+    let players = JSON.parse(localStorage.getItem('fut7_players')) || [];
+    let waitlist = JSON.parse(localStorage.getItem('fut7_waitlist')) || [];
 
     document.getElementById('eventTitle').value = eventData.title;
     document.getElementById('eventLocation').value = eventData.location;
@@ -128,62 +166,133 @@
       };
       localStorage.setItem('fut7_event', JSON.stringify(eventData));
       alert('¡Detalles del evento actualizados con éxito!');
+      renderAdminTables();
     }
 
     function deleteEvent() {
-      if (confirm('¿Estás seguro de eliminar el evento y vaciar todas las inscripciones?')) {
+      if (confirm('¿Estás seguro de eliminar el evento y vaciar todas las inscripciones y listas de espera?')) {
         localStorage.removeItem('fut7_event');
         localStorage.removeItem('fut7_players');
+        localStorage.removeItem('fut7_waitlist');
         location.reload();
       }
     }
 
-    function renderAdminTable() {
-      const tbody = document.getElementById('adminPlayerTable');
-      tbody.innerHTML = '';
+    function renderAdminTables() {
+      const tbodyPlayers = document.getElementById('adminPlayerTable');
+      const tbodyWaitlist = document.getElementById('adminWaitlistTable');
+      
+      tbodyPlayers.innerHTML = '';
+      tbodyWaitlist.innerHTML = '';
 
+      // Render Titulares
       if (players.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">No hay jugadores inscritos todavía.</td></tr>`;
-        return;
+        tbodyPlayers.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">No hay jugadores titulares inscritos todavía.</td></tr>`;
+      } else {
+        players.forEach((p, index) => {
+          let badge = p.status === 'confirmed'
+            ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md">Confirmado</span>`
+            : `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md">Pendiente</span>`;
+
+          let actionBtn = p.status === 'pending'
+            ? `<button onclick="changePlayerStatus(${index}, 'confirmed')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition mr-1">Aprobar</button>`
+            : `<button onclick="changePlayerStatus(${index}, 'pending')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition mr-1">Pendiente</button>`;
+
+          tbodyPlayers.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-medium text-slate-700">${p.name} <br><span class="text-xs text-slate-400">${p.phone || ''}</span></td>
+              <td class="p-3 font-semibold text-slate-600">${p.team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}</td>
+              <td class="p-3">${badge}</td>
+              <td class="p-3 text-right">
+                ${actionBtn}
+                <button onclick="moveToWaitlist(${index})" title="Mover a lista de espera" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-xs font-bold px-2.5 py-1.5 rounded-lg transition mr-1"><i class="fa-solid fa-arrow-down"></i></button>
+                <button onclick="deletePlayer(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>`;
+        });
       }
 
-      players.forEach((p, index) => {
-        let badge = p.status === 'confirmed'
-          ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md">Confirmado</span>`
-          : `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md">Pendiente</span>`;
+      // Render Lista de Espera
+      if (waitlist.length === 0) {
+        tbodyWaitlist.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">No hay jugadores en lista de espera.</td></tr>`;
+      } else {
+        waitlist.forEach((w, index) => {
+          let badge = w.status === 'confirmed'
+            ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md">Confirmado</span>`
+            : `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-md">Pendiente</span>`;
 
-        let actionBtn = p.status === 'pending'
-          ? `<button onclick="changeStatus(${index}, 'confirmed')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition mr-2">Aprobar Pago</button>`
-          : `<button onclick="changeStatus(${index}, 'pending')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition mr-2">Marcar Pendiente</button>`;
-
-        tbody.innerHTML += `
-          <tr class="hover:bg-slate-50">
-            <td class="p-3 font-medium text-slate-700">${p.name}</td>
-            <td class="p-3 font-semibold text-slate-600">${p.team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}</td>
-            <td class="p-3">${badge}</td>
-            <td class="p-3 text-right">
-              ${actionBtn}
-              <button onclick="deletePlayer(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
-            </td>
-          </tr>`;
-      });
+          tbodyWaitlist.innerHTML += `
+            <tr class="hover:bg-slate-50">
+              <td class="p-3 font-medium text-slate-700">${w.name}</td>
+              <td class="p-3 text-slate-500">${w.phone}</td>
+              <td class="p-3">${badge}</td>
+              <td class="p-3 text-right">
+                <button onclick="promoteToTeam(${index}, 'TEAM_A')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg transition mr-1">Al Blanco</button>
+                <button onclick="promoteToTeam(${index}, 'TEAM_B')" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg transition mr-1">Al Negro</button>
+                <button onclick="deleteWaitlist(${index})" class="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+              </td>
+            </tr>`;
+        });
+      }
     }
 
-    function changeStatus(index, newStatus) {
+    function changePlayerStatus(index, newStatus) {
       players[index].status = newStatus;
       localStorage.setItem('fut7_players', JSON.stringify(players));
-      renderAdminTable();
+      renderAdminTables();
     }
 
     function deletePlayer(index) {
-      if (confirm('¿Deseas eliminar a este jugador de la convocatoria?')) {
+      if (confirm('¿Deseas eliminar permanentemente a este jugador?')) {
         players.splice(index, 1);
+        
+        // Si hay gente en espera, podrías opcionalmente avisar, aquí simplemente actualizamos
         localStorage.setItem('fut7_players', JSON.stringify(players));
-        renderAdminTable();
+        renderAdminTables();
       }
     }
 
-    renderAdminTable();
+    function moveToWaitlist(index) {
+      let p = players[index];
+      players.splice(index, 1); // Lo quitamos de titulares
+      waitlist.push(p);         // Lo mandamos al final de la espera
+      
+      localStorage.setItem('fut7_players', JSON.stringify(players));
+      localStorage.setItem('fut7_waitlist', JSON.stringify(waitlist));
+      renderAdminTables();
+      alert(`${p.name} fue movido a la lista de espera.`);
+    }
+
+    function promoteToTeam(index, targetTeam) {
+      let maxPerTeam = eventData.playersPerTeam || 5;
+      let countTarget = players.filter(p => p.team === targetTeam).length;
+
+      if (countTarget >= maxPerTeam) {
+        alert(`El equipo seleccionado ya está completo (${maxPerTeam}/${maxPerTeam}). Libera un espacio primero.`);
+        return;
+      }
+
+      let w = waitlist[index];
+      waitlist.splice(index, 1); // Lo sacamos de espera
+      w.team = targetTeam;       // Le asignamos el equipo
+      players.push(w);           // Lo metemos a titulares
+
+      localStorage.setItem('fut7_players', JSON.stringify(players));
+      localStorage.setItem('fut7_waitlist', JSON.stringify(waitlist));
+      renderAdminTables();
+      alert(`${w.name} ahora es titular en el ${targetTeam === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}.`);
+    }
+
+    function deleteWaitlist(index) {
+      if (confirm('¿Deseas eliminar a este jugador de la lista de espera?')) {
+        waitlist.splice(index, 1);
+        localStorage.setItem('fut7_waitlist', JSON.stringify(waitlist));
+        renderAdminTables();
+      }
+    }
+
+    renderAdminTables();
   </script>
 </body>
-</html>
+                </html>
+      
