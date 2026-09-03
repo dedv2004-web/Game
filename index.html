@@ -142,9 +142,6 @@
   <script>
     // Inicializar datos en memoria del navegador
     let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-      { name: 'Carlos Mendoza', team: 'TEAM_A', status: 'confirmed' },
-      { name: 'Andrés Pérez', team: 'TEAM_A', status: 'pending' },
-      { name: 'Matías Rojas', team: 'TEAM_B', status: 'confirmed' }
     ];
 
     function toggleModal() {
@@ -238,7 +235,7 @@
       document.getElementById('playerForm').reset();
 
       // Enviar un mensaje automático de WhatsApp al administrador con los datos
-      const adminPhone = "56912345678"; // Reemplaza con tu número de WhatsApp real
+      const adminPhone = "56965222597"; // Reemplaza con tu número de WhatsApp real
       const message = `Hola! Me acabo de inscribir al partido en el ${team === 'TEAM_A' ? 'Equipo A' : 'Equipo B'}. Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
       window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`, '_blank');
     }
