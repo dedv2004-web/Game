@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -17,15 +17,15 @@
           <span class="bg-emerald-500 text-emerald-950 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
             Convocatoria Abierta
           </span>
-          <h1 class="text-3xl font-black mt-2">⚽ Gran Partido Fútbol 7</h1>
-          <p class="text-emerald-100 text-sm mt-1">
+          <h1 id="publicTitle" class="text-3xl font-black mt-2">⚽ Gran Partido Fútbol 7</h1>
+          <p id="publicDetails" class="text-emerald-100 text-sm mt-1">
             <i class="fa-solid fa-location-dot mr-1"></i> Cancha Don Bosco • 
             <i class="fa-solid fa-calendar-day mx-1"></i> Viernes 12 de Octubre, 20:00 hrs
           </p>
         </div>
         <div class="bg-emerald-900/80 p-4 rounded-xl border border-emerald-600 text-center">
           <p class="text-xs text-emerald-200 uppercase font-semibold">Cuota por Jugador</p>
-          <p class="text-2xl font-black text-amber-400">$5.000</p>
+          <p id="publicPrice" class="text-2xl font-black text-amber-400">$5.000</p>
         </div>
       </div>
     </div>
@@ -102,7 +102,7 @@
 
       <!-- Datos Bancarios -->
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs mb-6 text-emerald-950 space-y-1">
-        <p class="font-bold text-sm text-emerald-900 mb-1"><i class="fa-solid fa-university mr-1"></i> Cuenta para Transferir ($5.000):</p>
+        <p class="font-bold text-sm text-emerald-900 mb-1"><i class="fa-solid fa-university mr-1"></i> Cuenta para Transferir (<span id="modalPrice">$5.000</span>):</p>
         <p><strong>Banco:</strong> Banco Estado / Cuenta RUT</p>
         <p><strong>RUT:</strong> 12.345.678-9</p>
         <p><strong>Titular:</strong> Organización Canchas Fut7</p>
@@ -140,8 +140,28 @@
   </div>
 
   <script>
-    // Inicializar datos en memoria del navegador
+    // Cargar información dinámica del evento guardada por el Admin
+    let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
+      title: '⚽ Gran Partido Fútbol 7',
+      location: 'Cancha Don Bosco',
+      date: 'Viernes 12 de Octubre, 20:00 hrs',
+      price: '$5.000'
+    };
+
+    // Sincronizar datos del evento en la página pública
+    document.getElementById('publicTitle').innerText = eventData.title;
+    document.getElementById('publicDetails').innerHTML = `
+      <i class="fa-solid fa-location-dot mr-1"></i> ${eventData.location} • 
+      <i class="fa-solid fa-calendar-day mx-1"></i> ${eventData.date}
+    `;
+    document.getElementById('publicPrice').innerText = eventData.price;
+    document.getElementById('modalPrice').innerText = eventData.price;
+
+    // Cargar datos de jugadores
     let players = JSON.parse(localStorage.getItem('fut7_players')) || [
+      { name: 'Carlos Mendoza', team: 'TEAM_A', status: 'confirmed' },
+      { name: 'Andrés Pérez', team: 'TEAM_A', status: 'pending' },
+      { name: 'Matías Rojas', team: 'TEAM_B', status: 'confirmed' }
     ];
 
     function toggleModal() {
@@ -234,8 +254,8 @@
       toggleModal();
       document.getElementById('playerForm').reset();
 
-      // Enviar un mensaje automático de WhatsApp al administrador con los datos
-      const adminPhone = "56965222597"; // Reemplaza con tu número de WhatsApp real
+      // Enviar mensaje automático de WhatsApp al administrador
+      const adminPhone = "56912345678"; // Reemplaza con tu número de WhatsApp real
       const message = `Hola! Me acabo de inscribir al partido en el ${team === 'TEAM_A' ? 'Equipo A' : 'Equipo B'}. Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
       window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`, '_blank');
     }
@@ -244,5 +264,4 @@
     renderUI();
   </script>
 </body>
-</html>
-
+  </html>
