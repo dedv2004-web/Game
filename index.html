@@ -80,6 +80,17 @@
 
     </div>
 
+    <!-- Sección de Lista de Espera Pública -->
+    <section id="waitlistSectionContainer" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8 hidden">
+      <h3 class="font-bold text-slate-900 text-lg mb-1 flex items-center">
+        <i class="fa-solid fa-hourglass-half text-amber-600 mr-2"></i> Lista de Espera
+      </h3>
+      <p class="text-xs text-slate-500 mb-4">Los equipos titulares están llenos. Si algún cupo se libera, el administrador subirá a los siguientes en orden.</p>
+      <ul id="listWaitlistPublic" class="space-y-2.5 text-sm">
+        <!-- Dinámico -->
+      </ul>
+    </section>
+
     <!-- Botón para Inscribirse -->
     <div class="text-center">
       <button onclick="toggleModal()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-lg py-4 px-10 rounded-2xl shadow-lg transition-all transform active:scale-95">
@@ -123,7 +134,7 @@
                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Equipo</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Equipo Preferido</label>
             <select id="teamSelect" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm">
               <option value="TEAM_A">Equipo Blanco</option>
               <option value="TEAM_B">Equipo Negro</option>
@@ -159,10 +170,10 @@
     `;
     document.getElementById('publicPrice').innerText = eventData.price;
     document.getElementById('modalPrice').innerText = eventData.price;
-    document.getElementById('progressSubtitle').innerText = `Se requiere el pago verificado de los ${totalMaxPlayers} jugadores para cerrar la cancha.`;
+    document.getElementById('progressSubtitle').innerText = `Se requiere el pago verificado de los ${totalMaxPlayers} jugadores titulares para cerrar la cancha.`;
 
-    let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-    ];
+    let players = JSON.parse(localStorage.getItem('fut7_players')) || [];
+    let waitlist = JSON.parse(localStorage.getItem('fut7_waitlist')) || [];
 
     function toggleModal() {
       document.getElementById('paymentModal').classList.toggle('hidden');
@@ -171,9 +182,12 @@
     function renderUI() {
       const listA = document.getElementById('listTeamA');
       const listB = document.getElementById('listTeamB');
+      const listWaitlistPublic = document.getElementById('listWaitlistPublic');
+      const waitlistContainer = document.getElementById('waitlistSectionContainer');
       
       listA.innerHTML = '';
       listB.innerHTML = '';
+      listWaitlistPublic.innerHTML = '';
 
       let countA = 0;
       let countB = 0;
@@ -183,7 +197,7 @@
       const teamAPlayers = players.filter(p => p.team === 'TEAM_A');
       teamAPlayers.forEach((p, index) => {
         if (p.status === 'confirmed') totalConfirmed++;
-        if (p.status !== 'empty') countA++;
+        countA++;
         
         let badge = p.status === 'confirmed' 
           ? `<span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold"><i class="fa-solid fa-check mr-1"></i>Confirmado</span>`
@@ -196,7 +210,7 @@
           </li>`;
       });
 
-      // Cupos vacíos Equipo Blanco dinámicos según maxPerTeam
+      // Cupos vacíos Equipo Blanco
       for(let i = teamAPlayers.length; i < maxPerTeam; i++) {
         listA.innerHTML += `
           <li class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-dashed border-slate-200">
@@ -209,7 +223,7 @@
       const teamBPlayers = players.filter(p => p.team === 'TEAM_B');
       teamBPlayers.forEach((p, index) => {
         if (p.status === 'confirmed') totalConfirmed++;
-        if (p.status !== 'empty') countB++;
+        countB++;
         
         let badge = p.status === 'confirmed' 
           ? `<span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold"><i class="fa-solid fa-check mr-1"></i>Confirmado</span>`
@@ -222,13 +236,31 @@
           </li>`;
       });
 
-      // Cupos vacíos Equipo Negro dinámicos según maxPerTeam
+      // Cupos vacíos Equipo Negro
       for(let i = teamBPlayers.length; i < maxPerTeam; i++) {
         listB.innerHTML += `
           <li class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-dashed border-slate-200">
             <span>${i + 1}. Cupo disponible</span>
             <span class="text-xs text-slate-400">Libre</span>
           </li>`;
+      }
+
+      // Renderizar Lista de Espera Pública
+      if (waitlist.length > 0) {
+        waitlistContainer.classList.remove('hidden');
+        waitlist.forEach((w, index) => {
+          let badge = w.status === 'confirmed' 
+            ? `<span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md font-bold">Confirmado (En espera)</span>`
+            : `<span class="text-xs bg-amber-200 text-amber-900 px-2.5 py-1 rounded-md font-bold">Pendiente (En espera)</span>`;
+
+          listWaitlistPublic.innerHTML += `
+            <li class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl">
+              <span class="font-medium text-slate-700">${index + 1}. ${w.name} <span class="text-xs text-slate-400">(${w.team === 'TEAM_A' ? 'Prefiere Blanco' : 'Prefiere Negro'})</span></span>
+              ${badge}
+            </li>`;
+        });
+      } else {
+        waitlistContainer.classList.add('hidden');
       }
 
       // Actualizar contadores y barra
@@ -246,19 +278,36 @@
       const phone = document.getElementById('phone').value;
       const team = document.getElementById('teamSelect').value;
 
-      players.push({ name, team, status: 'pending' });
-      localStorage.setItem('fut7_players', JSON.stringify(players));
+      // Comprobar si el equipo elegido ya está lleno
+      const countCurrentTeam = players.filter(p => p.team === team).length;
 
-      renderUI();
-      toggleModal();
-      document.getElementById('playerForm').reset();
+      if (countCurrentTeam >= maxPerTeam) {
+        // A lista de espera
+        waitlist.push({ name, phone, team, status: 'pending' });
+        localStorage.setItem('fut7_waitlist', JSON.stringify(waitlist));
+        
+        renderUI();
+        toggleModal();
+        document.getElementById('playerForm').reset();
+
+        alert("Los cupos titulares de este equipo están llenos. Has quedado registrado en la **Lista de Espera**.");
+      } else {
+        // A titulares
+        players.push({ name, phone, team, status: 'pending' });
+        localStorage.setItem('fut7_players', JSON.stringify(players));
+
+        renderUI();
+        toggleModal();
+        document.getElementById('playerForm').reset();
+      }
 
       const adminPhone = "56965222597"; 
-      const message = `Hola! Me acabo de inscribir al partido en el ${team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}. Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
+      const message = `Hola! Me acabo de inscribir al partido (${countCurrentTeam >= maxPerTeam ? 'Lista de Espera' : (team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro')}). Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
       window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`, '_blank');
     }
 
     renderUI();
   </script>
 </body>
-</html>
+      </html>
+      
