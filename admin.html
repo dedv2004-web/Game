@@ -95,17 +95,14 @@
 
   <script>
     let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
-      title: '⚽ Gran Partido',
-      location: 'Cancha Don Bosco',
-      date: 'Viernes 12 de Octubre, 20:00 hrs',
-      price: '$5.000',
-      playersPerTeam: 7
+      title: '',
+      location: '',
+      date: '',
+      price: '$0',
+      playersPerTeam: 5
     };
 
     let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-      { name: 'Carlos Mendoza', team: 'TEAM_A', status: 'confirmed' },
-      { name: 'Andrés Pérez', team: 'TEAM_A', status: 'pending' },
-      { name: 'Matías Rojas', team: 'TEAM_B', status: 'confirmed' }
     ];
 
     document.getElementById('eventTitle').value = eventData.title;
@@ -162,7 +159,7 @@
         tbody.innerHTML += `
           <tr class="hover:bg-slate-50">
             <td class="p-3 font-medium text-slate-700">${p.name}</td>
-            <td class="p-3 font-semibold text-slate-600">${p.team === 'TEAM_A' ? 'Equipo A' : 'Equipo B'}</td>
+            <td class="p-3 font-semibold text-slate-600">${p.team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}</td>
             <td class="p-3">${badge}</td>
             <td class="p-3 text-right">
               ${actionBtn}
