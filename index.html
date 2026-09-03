@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Partido Fútbol 7 - Convocatoria Activa</title>
+  <title>Partido Fútbol - Convocatoria Activa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -17,15 +17,15 @@
           <span class="bg-emerald-500 text-emerald-950 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
             Convocatoria Abierta
           </span>
-          <h1 id="publicTitle" class="text-3xl font-black mt-2">⚽ Gran Partido Fútbol 7</h1>
+          <h1 id="publicTitle" class="text-3xl font-black mt-2">⚽ Partido Fútbol </h1>
           <p id="publicDetails" class="text-emerald-100 text-sm mt-1">
-            <i class="fa-solid fa-location-dot mr-1"></i> Cancha Don Bosco • 
-            <i class="fa-solid fa-calendar-day mx-1"></i> Viernes 12 de Octubre, 20:00 hrs
+            <i class="fa-solid fa-location-dot mr-1"></i> Club Dominica Sport • 
+            <i class="fa-solid fa-calendar-day mx-1"></i> 
           </p>
         </div>
         <div class="bg-emerald-900/80 p-4 rounded-xl border border-emerald-600 text-center">
           <p class="text-xs text-emerald-200 uppercase font-semibold">Cuota por Jugador</p>
-          <p id="publicPrice" class="text-2xl font-black text-amber-400">$5.000</p>
+          <p id="publicPrice" class="text-2xl font-black text-amber-400">$3.500</p>
         </div>
       </div>
     </div>
@@ -103,9 +103,9 @@
       <!-- Datos Bancarios -->
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs mb-6 text-emerald-950 space-y-1">
         <p class="font-bold text-sm text-emerald-900 mb-1"><i class="fa-solid fa-university mr-1"></i> Cuenta para Transferir (<span id="modalPrice">$5.000</span>):</p>
-        <p><strong>Banco:</strong> Banco Estado / Cuenta RUT</p>
-        <p><strong>RUT:</strong> 12.345.678-9</p>
-        <p><strong>Titular:</strong> Organización Canchas Fut7</p>
+        <p><strong>Banco:</strong> Banco Tenpo / Cuenta Vista 111126075360</p>
+        <p><strong>RUT:</strong> 26.075.360-6</p>
+        <p><strong>Titular:</strong> Daniel Diaz</p>
       </div>
 
       <!-- Formulario -->
@@ -142,10 +142,10 @@
   <script>
     // Cargar información dinámica del evento guardada por el Admin
     let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
-      title: '⚽ Gran Partido Fútbol 7',
-      location: 'Cancha Don Bosco',
-      date: 'Viernes 12 de Octubre, 20:00 hrs',
-      price: '$5.000'
+      title: '',
+      location: '',
+      date: '',
+      price: ''
     };
 
     // Sincronizar datos del evento en la página pública
