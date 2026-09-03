@@ -17,15 +17,15 @@
           <span class="bg-emerald-500 text-emerald-950 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">
             Convocatoria Abierta
           </span>
-          <h1 id="publicTitle" class="text-3xl font-black mt-2">⚽ Gran Partido</h1>
+          <h1 id="publicTitle" class="text-3xl font-black mt-2"></h1>
           <p id="publicDetails" class="text-emerald-100 text-sm mt-1">
-            <i class="fa-solid fa-location-dot mr-1"></i> Cancha Don Bosco • 
-            <i class="fa-solid fa-calendar-day mx-1"></i> Viernes 12 de Octubre, 20:00 hrs
+            <i class="fa-solid fa-location-dot mr-1"></i>  
+            <i class="fa-solid fa-calendar-day mx-1"></i> 
           </p>
         </div>
         <div class="bg-emerald-900/80 p-4 rounded-xl border border-emerald-600 text-center">
           <p class="text-xs text-emerald-200 uppercase font-semibold">Cuota por Jugador</p>
-          <p id="publicPrice" class="text-2xl font-black text-amber-400">$5.000</p>
+          <p id="publicPrice" class="text-2xl font-black text-amber-400">$0</p>
         </div>
       </div>
     </div>
@@ -52,11 +52,11 @@
     <!-- Formación de Equipos -->
     <div class="grid md:grid-cols-2 gap-6 mb-8">
       
-      <!-- EQUIPO A -->
+      <!-- EQUIPO Blanco -->
       <div class="bg-white rounded-2xl p-5 shadow-sm border-t-4 border-blue-600">
         <div class="flex justify-between items-center mb-4">
           <h3 class="font-bold text-blue-950 text-lg flex items-center">
-            <i class="fa-solid fa-shirt text-blue-600 mr-2"></i> Equipo A
+            <i class="fa-solid fa-shirt text-blue-600 mr-2"></i> Equipo Blanco
           </h3>
           <span id="countTeamA" class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">0/7 Confirmados</span>
         </div>
@@ -65,11 +65,11 @@
         </ul>
       </div>
 
-      <!-- EQUIPO B -->
+      <!-- EQUIPO Negro -->
       <div class="bg-white rounded-2xl p-5 shadow-sm border-t-4 border-red-600">
         <div class="flex justify-between items-center mb-4">
           <h3 class="font-bold text-red-950 text-lg flex items-center">
-            <i class="fa-solid fa-shirt text-red-600 mr-2"></i> Equipo B
+            <i class="fa-solid fa-shirt text-red-600 mr-2"></i> Equipo Negro
           </h3>
           <span id="countTeamB" class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">0/7 Confirmados</span>
         </div>
@@ -103,9 +103,9 @@
       <!-- Datos Bancarios -->
       <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs mb-6 text-emerald-950 space-y-1">
         <p class="font-bold text-sm text-emerald-900 mb-1"><i class="fa-solid fa-university mr-1"></i> Cuenta para Transferir (<span id="modalPrice">$5.000</span>):</p>
-        <p><strong>Banco:</strong> Banco Estado / Cuenta RUT</p>
-        <p><strong>RUT:</strong> 12.345.678-9</p>
-        <p><strong>Titular:</strong> Organización Canchas</p>
+        <p><strong>Banco:</strong> Prepago Tenpo / Cuenta Vista 111126075360</p>
+        <p><strong>RUT:</strong> 26.075.360-6</p>
+        <p><strong>Titular:</strong> Daniel Diaz</p>
       </div>
 
       <!-- Formulario -->
@@ -125,8 +125,8 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Equipo</label>
             <select id="teamSelect" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm">
-              <option value="TEAM_A">Equipo A</option>
-              <option value="TEAM_B">Equipo B</option>
+              <option value="TEAM_A">Equipo Blanco</option>
+              <option value="TEAM_B">Equipo Negro</option>
             </select>
           </div>
         </div>
@@ -141,14 +141,14 @@
 
   <script>
     let eventData = JSON.parse(localStorage.getItem('fut7_event')) || {
-      title: '⚽ Gran Partido',
-      location: 'Cancha Don Bosco',
-      date: 'Viernes 12 de Octubre, 20:00 hrs',
-      price: '$5.000',
-      playersPerTeam: 7
+      title: '',
+      location: '',
+      date: '',
+      price: '$0',
+      playersPerTeam: 5
     };
 
-    const maxPerTeam = eventData.playersPerTeam || 7;
+    const maxPerTeam = eventData.playersPerTeam || 5;
     const totalMaxPlayers = maxPerTeam * 2;
 
     // Sincronizar datos generales
@@ -162,9 +162,6 @@
     document.getElementById('progressSubtitle').innerText = `Se requiere el pago verificado de los ${totalMaxPlayers} jugadores para cerrar la cancha.`;
 
     let players = JSON.parse(localStorage.getItem('fut7_players')) || [
-      { name: 'Carlos Mendoza', team: 'TEAM_A', status: 'confirmed' },
-      { name: 'Andrés Pérez', team: 'TEAM_A', status: 'pending' },
-      { name: 'Matías Rojas', team: 'TEAM_B', status: 'confirmed' }
     ];
 
     function toggleModal() {
@@ -182,7 +179,7 @@
       let countB = 0;
       let totalConfirmed = 0;
 
-      // Equipo A
+      // Equipo Blanco
       const teamAPlayers = players.filter(p => p.team === 'TEAM_A');
       teamAPlayers.forEach((p, index) => {
         if (p.status === 'confirmed') totalConfirmed++;
@@ -199,7 +196,7 @@
           </li>`;
       });
 
-      // Cupos vacíos Equipo A dinámicos según maxPerTeam
+      // Cupos vacíos Equipo Blanco dinámicos según maxPerTeam
       for(let i = teamAPlayers.length; i < maxPerTeam; i++) {
         listA.innerHTML += `
           <li class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-dashed border-slate-200">
@@ -208,7 +205,7 @@
           </li>`;
       }
 
-      // Equipo B
+      // Equipo Negro
       const teamBPlayers = players.filter(p => p.team === 'TEAM_B');
       teamBPlayers.forEach((p, index) => {
         if (p.status === 'confirmed') totalConfirmed++;
@@ -225,7 +222,7 @@
           </li>`;
       });
 
-      // Cupos vacíos Equipo B dinámicos según maxPerTeam
+      // Cupos vacíos Equipo Negro dinámicos según maxPerTeam
       for(let i = teamBPlayers.length; i < maxPerTeam; i++) {
         listB.innerHTML += `
           <li class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-slate-400 border border-dashed border-slate-200">
@@ -256,8 +253,8 @@
       toggleModal();
       document.getElementById('playerForm').reset();
 
-      const adminPhone = "56912345678"; 
-      const message = `Hola! Me acabo de inscribir al partido en el ${team === 'TEAM_A' ? 'Equipo A' : 'Equipo B'}. Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
+      const adminPhone = "56965222597"; 
+      const message = `Hola! Me acabo de inscribir al partido en el ${team === 'TEAM_A' ? 'Equipo Blanco' : 'Equipo Negro'}. Mi nombre es ${name}. Adjunto mi comprobante de transferencia.`;
       window.open(`https://api.whatsapp.com/send?phone=${adminPhone}&text=${encodeURIComponent(message)}`, '_blank');
     }
 
